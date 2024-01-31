@@ -60,9 +60,83 @@ namespace csharp
                 var itemType = ItemWrappers[i].ItemType;
                 var item = ItemWrappers[i].Item;
 
-                DecreaseQuality(itemType, item);
-                DecreaseSellIn(itemType, item);
-                AfterSellInCheck(itemType, item);
+                switch (itemType)
+                {
+                    case TypeItem.Other:
+                        if (item.Quality > 0)
+                        {
+                            item.Quality -= 1;
+                        }
+
+                        break;
+                    case TypeItem.Brie:
+                        if (item.Quality < 50)
+                        {
+                            item.Quality += 1;
+                        }
+
+                        break;
+                    case TypeItem.Concert:
+                    {
+                        var qualityAdjustment = 0;
+                        if (item.SellIn > 10)
+                        {
+                            qualityAdjustment = 1;
+                        }
+                        else if (item.SellIn > 5)
+                        {
+                            qualityAdjustment = 2;
+                        }
+                        else if (item.SellIn > 0)
+                        {
+                            qualityAdjustment = 3;
+                        }
+                        else
+                        {
+                            qualityAdjustment = -item.Quality;
+                        }
+
+                        item.Quality = Math.Clamp(item.Quality + qualityAdjustment, 0, 50);
+
+                        break;
+                    }
+                    case TypeItem.Legendary:
+                        // Do nothing
+                        break;
+                }
+
+                if (itemType != TypeItem.Legendary)
+                {
+                    item.SellIn -= 1;
+                }
+
+                // Quality degrades twice as fast after SellIn
+                if (item.SellIn < 0)
+                {
+                    switch (itemType)
+                    {
+                        case TypeItem.Other:
+                            if (item.Quality > 0)
+                            {
+                                item.Quality -= 1;
+                            }
+
+                            break;
+                        case TypeItem.Brie:
+                            if (item.Quality < 50)
+                            {
+                                item.Quality += 1;
+                            }
+
+                            break;
+                        case TypeItem.Concert:
+                            break;
+                        case TypeItem.Legendary:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null);
+                    }
+                }
             }
         }
 
@@ -71,37 +145,47 @@ namespace csharp
             switch (ItemType)
             {
                 case TypeItem.Other:
-                    DecreaseQuality(Item);
+                    if (Item.Quality > 0)
+                    {
+                        Item.Quality -= 1;
+                    }
+
+                    break;
+                case TypeItem.Brie:
+                    if (Item.Quality < 50)
+                    {
+                        Item.Quality += 1;
+                    }
+
                     break;
                 case TypeItem.Concert:
                 {
-                    IncreaseQuality(Item);
+                    if (Item.Quality < 50)
+                    {
+                        Item.Quality += 1;
+                    }
+
                     if (Item.SellIn < 11)
                     {
-                        IncreaseQuality(Item);
+                        if (Item.Quality < 50)
+                        {
+                            Item.Quality += 1;
+                        }
                     }
 
                     if (Item.SellIn < 6)
                     {
-                        IncreaseQuality(Item);
+                        if (Item.Quality < 50)
+                        {
+                            Item.Quality += 1;
+                        }
                     }
 
                     break;
                 }
-                case TypeItem.Brie:
-                    IncreaseQuality(Item);
-                    break;
                 case TypeItem.Legendary:
                     // Do nothing
                     break;
-            }
-        }
-
-        private void DecreaseQuality(Item item)
-        {
-            if (item.Quality > 0)
-            {
-                item.Quality -= 1;
             }
         }
 
@@ -112,10 +196,18 @@ namespace csharp
             switch (itemType)
             {
                 case TypeItem.Other:
-                    DecreaseQuality(item);
+                    if (item.Quality > 0)
+                    {
+                        item.Quality -= 1;
+                    }
+
                     break;
                 case TypeItem.Brie:
-                    IncreaseQuality(item);
+                    if (item.Quality < 50)
+                    {
+                        item.Quality += 1;
+                    }
+
                     break;
                 case TypeItem.Concert:
                     item.Quality = 0;
@@ -133,15 +225,6 @@ namespace csharp
             if (ItemType != TypeItem.Legendary)
             {
                 item.SellIn -= 1;
-            }
-        }
-
-
-        private void IncreaseQuality(Item item)
-        {
-            if (item.Quality < 50)
-            {
-                item.Quality += 1;
             }
         }
     }
