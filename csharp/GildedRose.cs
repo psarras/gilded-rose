@@ -18,11 +18,14 @@ namespace csharp
             {
                 // Decrease Quality unless Brie or Tickets
                 item = Items[i];
-                if (item.Name != "Aged Brie" && item.Name != "Backstage passes to a TAFKAL80ETC concert")
+                var isConcert = item.Name == "Backstage passes to a TAFKAL80ETC concert";
+                var isBrie = item.Name == "Aged Brie";
+                var isLegendary = item.Name == "Sulfuras, Hand of Ragnaros";
+                if (!isBrie && !isConcert)
                 {
                     if (item.Quality > 0)
                     {
-                        if (item.Name != "Sulfuras, Hand of Ragnaros")
+                        if (!isLegendary)
                         {
                             item.Quality -= 1;
                         }
@@ -31,28 +34,25 @@ namespace csharp
                 // Deal with the edge cases
                 else
                 {
-                    if (item.Quality < 50) // No item more than 50
+                    IncreaseQuality();
+
+                    // Deal with the Concert Tickets
+                    if (isConcert)
                     {
-                        IncreaseQuality();
-
-                        // Deal with the Concert Tickets
-                        if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
+                        if (item.SellIn < 11) // 10 days or less
                         {
-                            if (item.SellIn < 11) // 10 days or less
-                            {
-                                IncreaseQuality();
-                            }
+                            IncreaseQuality();
+                        }
 
-                            if (item.SellIn < 6) // 5 days or less
-                            {
-                                IncreaseQuality();
-                            }
+                        if (item.SellIn < 6) // 5 days or less
+                        {
+                            IncreaseQuality();
                         }
                     }
                 }
 
-                // Decrease SellIn unless Sulfuras
-                if (item.Name != "Sulfuras, Hand of Ragnaros")
+                // Decrease SellIn unless Legendary
+                if (!isLegendary)
                 {
                     item.SellIn -= 1;
                 }
@@ -60,13 +60,13 @@ namespace csharp
                 // Quality degrades twice as fast after SellIn
                 if (item.SellIn < 0)
                 {
-                    if (item.Name != "Aged Brie")
+                    if (!isBrie)
                     {
-                        if (item.Name != "Backstage passes to a TAFKAL80ETC concert")
+                        if (!isConcert)
                         {
                             if (item.Quality > 0)
                             {
-                                if (item.Name != "Sulfuras, Hand of Ragnaros")
+                                if (!isLegendary)
                                 {
                                     item.Quality -= 1;
                                 }
