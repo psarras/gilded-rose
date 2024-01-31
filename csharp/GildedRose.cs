@@ -36,61 +36,72 @@ namespace csharp
                 this.Item = item;
 
                 ItemType = TypeItem.Other;
-                var isConcert = item.Name == "Backstage passes to a TAFKAL80ETC concert";
-                var isBrie = item.Name == "Aged Brie";
-                var isLegendary = item.Name == "Sulfuras, Hand of Ragnaros";
 
-                if (isConcert)
+                if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
                 {
                     ItemType = TypeItem.Concert;
                 }
-                else if (isBrie)
+                else if (item.Name == "Aged Brie")
                 {
                     ItemType = TypeItem.Brie;
                 }
-                else if (isLegendary)
+                else if (item.Name == "Sulfuras, Hand of Ragnaros")
                 {
                     ItemType = TypeItem.Legendary;
                 }
             }
         }
 
+
         public void UpdateQuality()
         {
             for (var i = 0; i < ItemWrappers.Count; i++)
             {
-                // Decrease Quality unless Brie or Tickets
-                var ItemType = ItemWrappers[i].ItemType;
-                var Item = ItemWrappers[i].Item;
+                var itemType = ItemWrappers[i].ItemType;
+                var item = ItemWrappers[i].Item;
 
-                if (ItemType == TypeItem.Other)
-                {
+                DecreaseQuality(itemType, item);
+                DecreaseSellIn(itemType, item);
+                AfterSellInCheck(itemType, item);
+            }
+        }
+
+        private void DecreaseQuality(TypeItem ItemType, Item Item)
+        {
+            switch (ItemType)
+            {
+                case TypeItem.Other:
                     DecreaseQuality(Item);
-                }
-                // Deal with the edge cases
-                else
+                    break;
+                case TypeItem.Concert:
                 {
                     IncreaseQuality(Item);
-
-                    // Deal with the Concert Tickets
-                    if (ItemType == TypeItem.Concert)
+                    if (Item.SellIn < 11)
                     {
-                        if (Item.SellIn < 11) // 10 days or less
-                        {
-                            IncreaseQuality(Item);
-                        }
-
-                        if (Item.SellIn < 6) // 5 days or less
-                        {
-                            IncreaseQuality(Item);
-                        }
+                        IncreaseQuality(Item);
                     }
+
+                    if (Item.SellIn < 6)
+                    {
+                        IncreaseQuality(Item);
+                    }
+
+                    break;
                 }
+                case TypeItem.Brie:
+                    IncreaseQuality(Item);
+                    break;
+                case TypeItem.Legendary:
+                    // Do nothing
+                    break;
+            }
+        }
 
-                // Decrease SellIn unless Legendary
-                DecreaseSellIn(ItemType, Item);
-
-                AfterSellInCheck(ItemType, Item);
+        private void DecreaseQuality(Item item)
+        {
+            if (item.Quality > 0)
+            {
+                item.Quality -= 1;
             }
         }
 
@@ -100,6 +111,9 @@ namespace csharp
             if (item.SellIn >= 0) return;
             switch (itemType)
             {
+                case TypeItem.Other:
+                    DecreaseQuality(item);
+                    break;
                 case TypeItem.Brie:
                     IncreaseQuality(item);
                     break;
@@ -107,9 +121,6 @@ namespace csharp
                     item.Quality = 0;
                     break;
                 case TypeItem.Legendary:
-                    break;
-                case TypeItem.Other:
-                    DecreaseQuality(item);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null);
@@ -125,13 +136,6 @@ namespace csharp
             }
         }
 
-        private void DecreaseQuality(Item item)
-        {
-            if (item.Quality > 0)
-            {
-                item.Quality -= 1;
-            }
-        }
 
         private void IncreaseQuality(Item item)
         {
