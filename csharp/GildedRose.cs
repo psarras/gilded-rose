@@ -16,10 +16,10 @@ namespace csharp
         {
             foreach (var item in Items)
             {
-                int qualityAdjustement = 1;
+                int qualityAdjustement;
                 if (item.Name == "Aged Brie")
                 {
-                    item.Quality = Math.Min(item.Quality + 1, 50);
+                    qualityAdjustement = 1;
                 }
                 else if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
                 {
@@ -39,16 +39,19 @@ namespace csharp
                     {
                         qualityAdjustement = -item.Quality;
                     }
-
-
-                    item.Quality = Math.Min(item.Quality + qualityAdjustement, 50);
                 }
                 else if (item.Name == "Sulfuras, Hand of Ragnaros")
                 {
+                    qualityAdjustement = 0;
                 }
                 else
                 {
-                    item.Quality = Math.Max(item.Quality - 1, 0);
+                    qualityAdjustement = -1;
+                }
+
+                if (qualityAdjustement != 0)
+                {
+                    item.Quality = Math.Clamp(item.Quality + qualityAdjustement, 0, 50);
                 }
 
 
