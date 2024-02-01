@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static System.Text.RegularExpressions.Regex;
 
 namespace csharp
 {
@@ -16,42 +17,42 @@ namespace csharp
         {
             foreach (var item in Items)
             {
-                int qualityAdjustement;
-                if (item.Name == "Aged Brie")
+                Func<int> qualityAdjustement = null;
+                if (IsMatch(item.Name, "^Aged Brie$"))
                 {
-                    qualityAdjustement = item.SellIn > 0 ? 1 : 2;
+                    qualityAdjustement = () => item.SellIn > 0 ? 1 : 2;
                 }
-                else if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
+                else if (IsMatch(item.Name, "^Backstage passes"))
                 {
                     if (item.SellIn > 10)
                     {
-                        qualityAdjustement = 1;
+                        qualityAdjustement = () => 1;
                     }
                     else if (item.SellIn > 5)
                     {
-                        qualityAdjustement = 2;
+                        qualityAdjustement = () => 2;
                     }
                     else if (item.SellIn > 0)
                     {
-                        qualityAdjustement = 3;
+                        qualityAdjustement = () => 3;
                     }
                     else
                     {
-                        qualityAdjustement = -item.Quality;
+                        qualityAdjustement = () => -item.Quality;
                     }
                 }
-                else if (item.Name == "Sulfuras, Hand of Ragnaros")
+                else if (IsMatch(item.Name, "^Sulfuras"))
                 {
-                    qualityAdjustement = 0;
+                    qualityAdjustement = null;
                 }
-                else
+                else if (IsMatch(item.Name, ".*"))
                 {
-                    qualityAdjustement = item.SellIn > 0 ? -1 : -2;
+                    qualityAdjustement = () => item.SellIn > 0 ? -1 : -2;
                 }
 
-                if (qualityAdjustement != 0)
+                if (qualityAdjustement != null)
                 {
-                    item.Quality = Math.Clamp(item.Quality + qualityAdjustement, 0, 50);
+                    item.Quality = Math.Clamp(item.Quality + qualityAdjustement(), 0, 50);
                 }
 
                 if (item.Name != "Sulfuras, Hand of Ragnaros")
