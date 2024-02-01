@@ -16,7 +16,7 @@ namespace csharp
         {
             foreach (var item in Items)
             {
-                int qualityAdjustement = 0;
+                int qualityAdjustement;
                 if (item.Name == "Aged Brie")
                 {
                     qualityAdjustement = item.SellIn > 0 ? 1 : 2;
@@ -35,6 +35,10 @@ namespace csharp
                 else if (item.Name == "Sulfuras, Hand of Ragnaros")
                 {
                     qualityAdjustement = 0;
+                }
+                else if (item.Name.StartsWith("Conjured"))
+                {
+                    qualityAdjustement = item.SellIn > 0 ? -2 : -4;
                 }
                 else
                 {
