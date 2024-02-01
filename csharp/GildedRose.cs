@@ -13,51 +13,41 @@ namespace csharp
             this.Items = Items;
         }
 
+        public static (string rule, Func<Item, int> adjustment)[] qualityAdjustments =
+        {
+            ("^Aged Brie$", item => item.SellIn > 0 ? 1 : 2),
+            ("^Backstage passes", item =>
+            {
+                if (item.SellIn > 10)
+                    return 1;
+                else if (item.SellIn > 5)
+                    return 2;
+                else if (item.SellIn > 0)
+                    return 3;
+                else
+                    return -item.Quality;
+            }),
+            ("^Sulfuras", null),
+            (".*", item => item.SellIn > 0 ? -1 : -2)
+        };
+
         public void UpdateQuality()
         {
             foreach (var item in Items)
             {
-                Func<int> qualityAdjustement = null;
-                if (IsMatch(item.Name, "^Aged Brie$"))
+                foreach (var qualityAdjustment in qualityAdjustments)
                 {
-                    qualityAdjustement = () => item.SellIn > 0 ? 1 : 2;
-                }
-                else if (IsMatch(item.Name, "^Backstage passes"))
-                {
-                    if (item.SellIn > 10)
+                    var (rule, adjustment) = qualityAdjustment;
+                    if (IsMatch(item.Name, rule))
                     {
-                        qualityAdjustement = () => 1;
-                    }
-                    else if (item.SellIn > 5)
-                    {
-                        qualityAdjustement = () => 2;
-                    }
-                    else if (item.SellIn > 0)
-                    {
-                        qualityAdjustement = () => 3;
-                    }
-                    else
-                    {
-                        qualityAdjustement = () => -item.Quality;
-                    }
-                }
-                else if (IsMatch(item.Name, "^Sulfuras"))
-                {
-                    qualityAdjustement = null;
-                }
-                else if (IsMatch(item.Name, ".*"))
-                {
-                    qualityAdjustement = () => item.SellIn > 0 ? -1 : -2;
-                }
+                        if (adjustment != null)
+                        {
+                            item.Quality = Math.Clamp(item.Quality + adjustment(item), 0, 50);
+                            item.SellIn--;
+                        }
 
-                if (qualityAdjustement != null)
-                {
-                    item.Quality = Math.Clamp(item.Quality + qualityAdjustement(), 0, 50);
-                }
-
-                if (item.Name != "Sulfuras, Hand of Ragnaros")
-                {
-                    item.SellIn -= 1;
+                        break;
+                    }
                 }
             }
         }
