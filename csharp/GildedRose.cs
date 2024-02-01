@@ -19,7 +19,7 @@ namespace csharp
                 int qualityAdjustement = 0;
                 if (item.Name == "Aged Brie")
                 {
-                    qualityAdjustement = 1;
+                    qualityAdjustement = item.SellIn > 0 ? 1 : 2;
                 }
                 else if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
                 {
@@ -29,6 +29,8 @@ namespace csharp
                         qualityAdjustement = 2;
                     else if (item.SellIn > 0)
                         qualityAdjustement = 3;
+                    else
+                        qualityAdjustement = -item.Quality;
                 }
                 else if (item.Name == "Sulfuras, Hand of Ragnaros")
                 {
@@ -36,7 +38,7 @@ namespace csharp
                 }
                 else
                 {
-                    qualityAdjustement = -1;
+                    qualityAdjustement = item.SellIn > 0 ? -1 : -2;
                 }
 
                 if (qualityAdjustement != 0)
@@ -47,27 +49,6 @@ namespace csharp
                 if (item.Name != "Sulfuras, Hand of Ragnaros")
                 {
                     item.SellIn -= 1;
-                }
-                
-                
-
-                if (item.SellIn < 0)
-                {
-                    if (item.Name == "Aged Brie")
-                    {
-                        item.Quality = Math.Min(item.Quality + 1, 50);
-                    }
-                    else if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
-                    {
-                        item.Quality -= item.Quality;
-                    }
-                    else if (item.Name == "Sulfuras, Hand of Ragnaros")
-                    {
-                    }
-                    else
-                    {
-                        item.Quality = Math.Max(item.Quality - 1, 0);
-                    }
                 }
             }
         }
